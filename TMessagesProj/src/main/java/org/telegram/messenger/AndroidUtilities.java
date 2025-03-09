@@ -227,6 +227,7 @@ import tw.nekomimi.nekogram.utils.FileUtil;
 import tw.nekomimi.nekogram.utils.ProxyUtil;
 import tw.nekomimi.nekogram.utils.UIUtil;
 import tw.nekomimi.nekogram.utils.TelegramUtil;
+import xyz.nextalone.nagram.helper.ColorOsHelper;
 
 import static com.v2ray.ang.V2RayConfig.SSR_PROTOCOL;
 import static com.v2ray.ang.V2RayConfig.SS_PROTOCOL;
@@ -3484,7 +3485,11 @@ public class AndroidUtilities {
 //    }
 
     public static boolean shouldShowClipboardToast() {
-        return (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || !OneUIUtilities.hasBuiltInClipboardToasts()) && (Build.VERSION.SDK_INT < 32 || XiaomiUtilities.isMIUI());
+        boolean origin = (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || !OneUIUtilities.hasBuiltInClipboardToasts()) && Build.VERSION.SDK_INT < 32;
+        if (origin) return true;
+        boolean isMIUI = XiaomiUtilities.isMIUI();
+        boolean isColorOS = ColorOsHelper.INSTANCE.isColorOS();
+        return isMIUI || isColorOS;
     }
 
     public static boolean addToClipboard(CharSequence str) {
