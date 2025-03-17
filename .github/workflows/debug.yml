@@ -263,9 +263,9 @@ jobs:
       - name: Install NDK
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          echo "y" | sudo ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "ndk;21.4.7075529" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
+          echo "y" | sudo ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.2.12479018" --sdk_root=${ANDROID_SDK_ROOT} &> /dev/null
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
-          echo "ndk.dir=${ANDROID_HOME}/ndk/21.4.7075529" >> local.properties
+          echo "ndk.dir=${ANDROID_HOME}/ndk/27.2.12479018" >> local.properties
       - name: Install Rust
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./run init action shadowsocks

@@ -19,7 +19,7 @@ if (gradle.startParameter.taskNames.isNotEmpty()) {
 
 android {
 
-    ndkVersion = rootProject.extra.get("ndkVersion").toString()
+    ndkVersion = "27.2.12479018"
 
     compileSdk = 34
     defaultConfig {
@@ -41,6 +41,7 @@ android {
 }
 
 cargo {
+    val ndkDir = android.ndkDirectory
     module = "src/main/rust/shadowsocks-rust"
     libname = "ss-local"
     targets = when {
@@ -57,6 +58,18 @@ cargo {
             "local-flow-stat",
             "local-dns"))
     exec = { spec, toolchain ->
+        if (toolchain.target == "i686-linux-android") {
+			spec.environment("AR_i686-linux-android", "$ndkDir/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar")
+		}
+        if (toolchain.target == "x86_64-linux-android") {
+			spec.environment("AR_x86_64-linux-android", "$ndkDir/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar")
+		}
+		if (toolchain.target == "armv7-linux-androideabi") {
+			spec.environment("AR_armv7-linux-androideabi", "$ndkDir/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar")
+		}
+		if (toolchain.target == "aarch64-linux-android") {
+			spec.environment("AR_aarch64-linux-android", "$ndkDir/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar")
+		}
         spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
         spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
     }
