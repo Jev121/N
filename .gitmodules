@@ -32,7 +32,7 @@
 	url = https://github.com/google/re2.git
 [submodule "v2ray"]
 	path = v2ray
-	url = https://github.com/2dust/AndroidLibV2rayLite
+	url = https://github.com/etnperlong/AndroidLibV2rayLite.git
 [submodule "TMessagesProj/jni/ffmpeg"]
 	path = TMessagesProj/jni/ffmpeg
 	url = https://github.com/FFmpeg/FFmpeg
