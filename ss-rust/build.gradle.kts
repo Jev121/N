@@ -21,12 +21,12 @@ android {
 
     ndkVersion = rootProject.extra.get("ndkVersion").toString()
 
-    compileSdk = 31
+    compileSdk = 34
     defaultConfig {
         minSdk = 23
-        targetSdk = 31
+        targetSdk = 34
     }
-    buildToolsVersion = "31.0.0"
+    buildToolsVersion = "34.0.0"
     namespace = "io.nekohasekai.ss_rust"
 
     if (targetAbi.isNotBlank()) splits.abi {
