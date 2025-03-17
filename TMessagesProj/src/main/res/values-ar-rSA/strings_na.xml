@@ -2,7 +2,7 @@
 <resources>
     <string name="N_Config">تكوين N-Config</string>
     <string name="ForceCopy">إجبار النسخ</string>
-    <string name="InvertReply">Invert</string>
+    <string name="InvertReply">عكس</string>
     <string name="Great">عظيم</string>
     <string name="Poor">رديء</string>
     <string name="CombineMessage">دمج الرسالة</string>
@@ -35,7 +35,7 @@
     <string name="ShowPremiumStickersAnimation">إظهار الرسوم المتحركة للملصقات المميزة</string>
     <string name="ShowPremiumStarInChat">إظهار النجم المميز في الدردشة</string>
     <string name="ShowPremiumAvatarAnimation">إظهار الصورة الرمزية المميزة</string>
-    <string name="AlwaysSaveChatOffset">AlwaysSaveChatOffset</string>
+    <string name="AlwaysSaveChatOffset">حفظ الدردشة دائمًا</string>
     <string name="AutoReplaceRepeat">استبدال التكرار التلقائي للتكرار كنسخ</string>
     <string name="AppIconGoogle">جوجل</string>
     <string name="AppIconColorful">ملونة</string>
@@ -48,7 +48,7 @@
     <string name="AutoInsertGIFCaption">إدراج عنوان تلقائي قبل إرسال GIF</string>
     <string name="DefaultMonoLanguage">لغة الكود الافتراضي المخصصة</string>
     <string name="DisableGlobalSearch">تعطيل البحث العالمي</string>
-    <string name="InputMessageId">Input Message Id</string>
+    <string name="InputMessageId">معرف رسالة الإدخال</string>
     <string name="ToTheMessage">إلى الرسالة</string>
     <string name="HideOriginAfterTranslation">إخفاء الأصل بعد الترجمة</string>
     <string name="ZalgoFilter">تصفية رموز \"زالغو\"</string>
@@ -169,4 +169,20 @@
     <string name="DisableBotOpenButton">تعطيل زر فتح البوت</string>
     <string name="CustomTitleUserName">استخدام الاسم المستعار المستخدم كعنوان</string>
     <string name="EnhancedVideoBitrate">تحسين معدل بتر الفيديو المشترك</string>
+    <string name="DisableStarsSubscription">تعطيل إشعار بداية منخفضة الرصيد</string>
+    <string name="DisablePremiumExpiring">تعطيل إشعار انتهاء الصلاحية المميز</string>
+    <string name="DisablePremiumUpgrade">تعطيل إشعار الترقية المتميزة</string>
+    <string name="DisablePremiumChristmas">تعطيل إشعار عيد الميلاد المميز</string>
+    <string name="DisablePremiumRestore">تعطيل إشعار استرداد انتهاء الصلاحية المميز</string>
+    <string name="DisableBirthdayContact">تعطيل إشعار يوم ميلاد جهة الاتصال</string>
+    <string name="DisableFavoriteSearchEmojiTags">تعطيل قائمة الرموز التعبيرية في شريط البحث المفضل</string>
+    <string name="DisableFeatuerdEmojis">تعطيل Emojis المميز الشهير</string>
+    <string name="DisableFeaturedStickers">تعطيل الملصقات المتميزة</string>
+    <string name="DisableFeaturedGifs">تعطيل GIFs شعبية</string>
+    <string name="DisablePremiumFavoriteEmojiTags">تعطيل علامات الرموز التعبيرية المتميزة</string>
+    <string name="DisableNonPremiumChannelChatShow">تعطيل عرض الاسم المستعار للقناة الغير مميزة</string>
+    <string name="DisableRepeatInChannel">تعطيل التكرار في القناة</string>
+    <string name="DisableRepeatInChannelError">التكرار معطل في القناة</string>
+    <string name="DisableDoubleTapWhenSelecting">يتم تعطيل النقر المزدوج عند تحديد</string>
+    <string name="DisableActionBarButton">تعطيل زر شريط الإجراءات</string>
 </resources>
