@@ -29,7 +29,7 @@ fun mkDatabase(name: String, delete: Boolean = false, module: NitriteModule? = n
         val test = nitrite.openSharedPreference("shared_preferences")
         test.collection.close()
 
-        val subs = nitrite.getRepository("proxy_sub", SubInfo::class.java)
+        val subs = nitrite.getRepository(SubInfo::class.java, "proxy_sub")
         subs.close()
 
         return nitrite

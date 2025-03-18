@@ -1,6 +1,6 @@
 package tw.nekomimi.nekogram.proxy
 
-import org.dizitart.no2.objects.filters.ObjectFilters
+import org.dizitart.no2.filters.FluentFilter
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
 import tw.nekomimi.nekogram.database.mkDatabase
@@ -13,16 +13,17 @@ object SubManager {
 
     @JvmStatic
     val count
-        get() = subList.find().totalCount()
+        get() = subList.find().count()
 
     @JvmStatic
     val subList by lazy {
 
-        database.getRepository("proxy_sub", SubInfo::class.java).apply {
+        database.getRepository<SubInfo>(SubInfo::class.java, "proxy_sub").apply {
 
-            val public = find(ObjectFilters.eq("id", publicProxySubID)).firstOrDefault()
+            // val public = find(ObjectFilters.eq("id", publicProxySubID)).firstOrDefault()
+            val public = find(FluentFilter.where("id").eq(publicProxySubID)).firstOrNull()
 
-            update(SubInfo().apply {
+            val result = update(SubInfo().apply {
                 // SubManager.kt -> SubInfo.java -> ProxyLoads.kt
 
                 name = LocaleController.getString("NekoXProxy", R.string.NekoXProxy)

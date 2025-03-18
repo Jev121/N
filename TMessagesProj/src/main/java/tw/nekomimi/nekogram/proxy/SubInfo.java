@@ -2,11 +2,8 @@ package tw.nekomimi.nekogram.proxy;
 
 import androidx.annotation.NonNull;
 
-import org.dizitart.no2.Document;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.objects.Id;
-import org.dizitart.no2.objects.Index;
+import org.dizitart.no2.repository.annotations.Id;
+import org.dizitart.no2.repository.annotations.Index;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 
@@ -21,9 +18,8 @@ import cn.hutool.core.util.StrUtil;
 import tw.nekomimi.nekogram.NekoConfig;
 import tw.nekomimi.nekogram.parts.ProxyLoadsKt;
 
-@Index("id")
-@SuppressWarnings("unchecked")
-public class SubInfo implements Mappable {
+@Index(fields = "id")
+public class SubInfo {
 
     @Id
     public long id;
@@ -114,34 +110,15 @@ public class SubInfo implements Mappable {
         return id == subInfo.id;
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-
-        Document document = new Document();
-
-        document.put("id", id);
-        document.put("name", name);
-        document.put("urls", urls);
-        document.put("proxies", proxies);
-        document.put("lastFetch", lastFetch);
-        document.put("enable", enable);
-        document.put("internal", internal);
-
-        return document;
+    public SubInfo() {
     }
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-
-        id = document.get("id", Long.class);
-        name = document.get("name", String.class);
-        urls = (List<String>) document.get("urls");
-        proxies = (List<String>) document.get("proxies");
-
-        lastFetch = document.get("lastFetch", Long.class);
-        enable = document.get("enable", Boolean.class);
-        internal = document.get("internal", Boolean.class);
-
+    public SubInfo(Long id, String name, List<String> urls, List<String> proxies, Long lastFetch, boolean enable, boolean internal) {
+        this.id = id;
+        this.name = name;
+        this.urls = urls;
+        this.proxies = proxies;
+        this.lastFetch = lastFetch;
     }
 
 }
