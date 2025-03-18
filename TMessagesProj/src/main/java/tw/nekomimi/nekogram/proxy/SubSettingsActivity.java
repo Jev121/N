@@ -276,7 +276,7 @@ public class SubSettingsActivity extends BaseFragment {
 
             }
 
-            if (subInfo.id == 0) subInfo.id = SubManager.getCount() + 10;
+            if (subInfo.id == 0) subInfo.id = SubManager.getCount() + 1L;
 
             do {
 

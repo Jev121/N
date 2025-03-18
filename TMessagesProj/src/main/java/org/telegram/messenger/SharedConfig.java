@@ -32,11 +32,9 @@ import com.v2ray.ang.V2RayConfig;
 import com.v2ray.ang.dto.AngConfig;
 import com.v2ray.ang.util.Utils;
 
-import org.apache.commons.lang3.StringUtils;
-import org.dizitart.no2.objects.filters.ObjectFilters;
+import org.dizitart.no2.filters.FluentFilter;
 import org.json.JSONArray;
 import org.json.JSONException;
-import androidx.annotation.IntDef;
 
 import org.json.JSONObject;
 import org.telegram.tgnet.ConnectionsManager;
@@ -499,7 +497,7 @@ public class SharedConfig {
 
                 try {
 
-                    builder.append(SubManager.getSubList().find(ObjectFilters.eq("id", subId)).firstOrDefault().displayName());
+                    builder.append(SubManager.getSubList().find(FluentFilter.where("id").eq(subId)).firstOrNull().displayName());
 
                 } catch (Exception e) {
 
@@ -2585,7 +2583,7 @@ public class SharedConfig {
         }
         proxyList.remove(proxyInfo);
         if (proxyInfo.subId != 0) {
-            SubInfo sub = SubManager.getSubList().find(ObjectFilters.eq("id", proxyInfo.subId)).firstOrDefault();
+            SubInfo sub = SubManager.getSubList().find(FluentFilter.where("id").eq(proxyInfo.subId)).firstOrNull();
             try {
                 if (sub.proxies.remove(proxyInfo.toUrl())) {
                     SubManager.getSubList().update(sub);

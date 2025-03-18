@@ -22,13 +22,26 @@ import tw.nekomimi.nekogram.parts.ProxyLoadsKt;
 public class SubInfo {
 
     @Id
-    public long id;
+    public Long id;
     public String name;
     public List<String> urls = new LinkedList<>();
     public List<String> proxies = new LinkedList<>();
     public Long lastFetch = -1L;
     public boolean enable = true;
     public boolean internal;
+
+    public SubInfo() {
+    }
+
+    public SubInfo(Long id, String name, List<String> urls, List<String> proxies, Long lastFetch, boolean enable, boolean internal) {
+        this.id = id;
+        this.name = name;
+        this.urls = urls;
+        this.proxies = proxies;
+        this.lastFetch = lastFetch;
+        this.enable = enable;
+        this.internal = internal;
+    }
 
     public String displayName() {
 
@@ -60,7 +73,7 @@ public class SubInfo {
         } catch (Exception ignored) {
         }
 
-        throw new AllTriesFailed(exceptions);
+        throw new SubInfo.AllTriesFailed(exceptions);
 
     }
 
@@ -101,24 +114,4 @@ public class SubInfo {
         }
 
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SubInfo subInfo = (SubInfo) o;
-        return id == subInfo.id;
-    }
-
-    public SubInfo() {
-    }
-
-    public SubInfo(Long id, String name, List<String> urls, List<String> proxies, Long lastFetch, boolean enable, boolean internal) {
-        this.id = id;
-        this.name = name;
-        this.urls = urls;
-        this.proxies = proxies;
-        this.lastFetch = lastFetch;
-    }
-
 }
