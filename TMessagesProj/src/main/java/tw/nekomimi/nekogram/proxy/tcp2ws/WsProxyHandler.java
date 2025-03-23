@@ -2,17 +2,11 @@ package tw.nekomimi.nekogram.proxy.tcp2ws;
 
 import android.annotation.SuppressLint;
 
-import com.neovisionaries.ws.client.ThreadType;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFactory;
-import com.neovisionaries.ws.client.WebSocketFrame;
-import com.neovisionaries.ws.client.WebSocketListener;
-import com.neovisionaries.ws.client.WebSocketState;
 
-import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.common.value.qual.IntVal;
 import org.telegram.messenger.FileLog;
 
 import java.io.IOException;
@@ -23,21 +17,11 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocket;
-
-import cn.hutool.http.ssl.AndroidSupportSSLFactory;
-import cn.hutool.http.ssl.CustomProtocolsSSLFactory;
-import tw.nekomimi.nekogram.NekoConfig;
-import tw.nekomimi.nekogram.utils.DnsFactory;
 
 public class WsProxyHandler extends Thread {
 
@@ -87,10 +71,10 @@ public class WsProxyHandler extends Thread {
                 }
                 FileLog.d(String.format("[%s] read %d from local", wsHost, readLen));
                 if (readLen == -1) throw new Exception(String.format("[%s] socks closed", wsHost));
-                ;
+
                 if (wsStatus.get() != STATUS_OPENED)
                     throw new Exception(String.format("[%s] ws closed when trying to write", wsHost));
-                ;
+
                 this.webSocket.sendBinary(Arrays.copyOf(buffer, readLen));
             }
         } catch (SocketException se) {

@@ -147,6 +147,7 @@ import java.util.Objects;
 
 import tw.nekomimi.nekogram.NekoConfig;
 import tw.nekomimi.nekogram.ui.PinnedStickerHelper;
+import xyz.nextalone.nagram.NaConfig;
 
 public class EmojiView extends FrameLayout implements NotificationCenter.NotificationCenterDelegate {
 
@@ -5212,7 +5213,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         if (trendingAdapter != null) {
             trendingAdapter.notifyDataSetChanged();
         }
-        if (!NekoConfig.disableTrending.Bool() && !featured.isEmpty() && (!BuildVars.DEBUG_PRIVATE_VERSION || featuredStickerSets.isEmpty() || preferences.getLong("featured_hidden", 0) == featured.get(0).set.id)) {
+        if (!NaConfig.INSTANCE.getDisableFeaturedStickers().Bool() && !featured.isEmpty() && (!BuildVars.DEBUG_PRIVATE_VERSION || featuredStickerSets.isEmpty() || preferences.getLong("featured_hidden", 0) == featured.get(0).set.id)) {
             final int id = mediaDataController.getUnreadStickerSets().isEmpty() ? 2 : 3;
             final StickerTabView trendingStickersTabView = stickersTab.addStickerIconTab(id, stickerIcons[id]);
             trendingStickersTabView.textView.setText(LocaleController.getString(R.string.FeaturedStickersShort));
@@ -5396,10 +5397,8 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
             gifTabs.addIconTab(0, gifIcons[0]).setContentDescription(LocaleController.getString(R.string.RecentStickers));
         }
 
-        if (!NekoConfig.disableTrending.Bool()) {
-            gifTrendingTabNum = gifTabsCount++;
-            gifTabs.addIconTab(1, gifIcons[1]).setContentDescription(LocaleController.getString(R.string.FeaturedGifs));
-        }
+        gifTrendingTabNum = gifTabsCount++;
+        gifTabs.addIconTab(1, gifIcons[1]).setContentDescription(LocaleController.getString(R.string.FeaturedGifs));
 
         gifFirstEmojiTabNum = gifTabsCount;
         final int hPadding = AndroidUtilities.dp(13);
@@ -6788,6 +6787,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
 
     public static class EmojiPack {
         public int index;
+        public Long thumbDocumentId;
         public TLRPC.StickerSet set;
         public ArrayList<TLRPC.Document> documents = new ArrayList<>();
         public TLRPC.InputStickerSet needLoadSet;
@@ -7685,8 +7685,8 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
                         TLRPC.Document document = packs.get(position);
                         if (document instanceof SelectAnimatedEmojiDialog.SetTitleDocument) {
                             StickerSetNameCell cell = (StickerSetNameCell) holder.itemView;
-                            final String title = ((SelectAnimatedEmojiDialog.SetTitleDocument) document).title;
-                            final int index = lastSearchEmojiString == null || title == null ? -1 : title.toLowerCase().indexOf(lastSearchEmojiString.toLowerCase());
+                            final CharSequence title = ((SelectAnimatedEmojiDialog.SetTitleDocument) document).title;
+                            final int index = lastSearchEmojiString == null || title == null ? -1 : title.toString().toLowerCase().indexOf(lastSearchEmojiString.toLowerCase());
                             if (index >= 0) {
                                 cell.setText(title, 0, index, lastSearchEmojiString.length());
                             } else {
@@ -8122,6 +8122,7 @@ public class EmojiView extends FrameLayout implements NotificationCenter.Notific
         }
 
         public void loadTrendingGifs() {
+            if (NaConfig.INSTANCE.getDisableFeaturedGifs().Bool()) return;
             search("", "", true, true, true);
         }
 

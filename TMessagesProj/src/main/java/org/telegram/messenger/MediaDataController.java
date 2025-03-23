@@ -107,6 +107,7 @@ import java.util.regex.Pattern;
 
 import tw.nekomimi.nekogram.NekoConfig;
 import tw.nekomimi.nekogram.ui.PinnedStickerHelper;
+import xyz.nextalone.nagram.NaConfig;
 import xyz.nextalone.nagram.helper.ExternalStickerCacheHelper;
 
 @SuppressWarnings("unchecked")
@@ -2237,7 +2238,7 @@ public class MediaDataController extends BaseController {
     }
 
     public void loadFeaturedStickers(boolean emoji, boolean cache) {
-        if (loadingFeaturedStickers[emoji ? 1 : 0] || NekoConfig.disableTrending.Bool()) {
+        if (loadingFeaturedStickers[emoji ? 1 : 0] || NaConfig.INSTANCE.getDisableFeaturedStickers().Bool()) {
             return;
         }
         loadingFeaturedStickers[emoji ? 1 : 0] = true;
@@ -6917,6 +6918,7 @@ public class MediaDataController extends BaseController {
     }
 
     public static final int MAX_STYLE_RUNS_COUNT = 1000;
+    public static final int MAX_LINKS_COUNT = 250;
 
     public static void addAnimatedEmojiSpans(ArrayList<TLRPC.MessageEntity> entities, CharSequence messageText, Paint.FontMetricsInt fontMetricsInt) {
         if (!(messageText instanceof Spannable) || entities == null) {

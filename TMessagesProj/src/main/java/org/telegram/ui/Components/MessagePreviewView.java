@@ -489,8 +489,8 @@ public class MessagePreviewView extends FrameLayout {
 
                                 int left = (cell.getLeft() + cell.getBackgroundDrawableLeft());
                                 int right = (cell.getLeft() + cell.getBackgroundDrawableRight());
-                                int top = (cell.getTop() + cell.getBackgroundDrawableTop());
-                                int bottom = (cell.getTop() + cell.getBackgroundDrawableBottom());
+                                int top = (cell.getTop() + cell.getPaddingTop() + cell.getBackgroundDrawableTop());
+                                int bottom = (cell.getTop() + cell.getPaddingTop() + cell.getBackgroundDrawableBottom());
 
                                 if ((cell.getCurrentPosition().flags & MessageObject.POSITION_FLAG_TOP) == 0) {
                                     top -= dp(10);
@@ -1079,7 +1079,9 @@ public class MessagePreviewView extends FrameLayout {
 
                 ActionBarMenuSubItem sendMessagesView = new ActionBarMenuSubItem(context, false, false, resourcesProvider);
                 sendMessagesView.setTextAndIcon(LocaleController.getString(messagePreviewParams.webpage.document != null ? messagePreviewParams.isVideo ? R.string.PreviewSendVideo : R.string.PreviewSendFile : R.string.PreviewSendPhoto), R.drawable.msg_send);
-                menu.addView(sendMessagesView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                if (messagePreviewParams.webpage.document != null || messagePreviewParams.webpage.photo != null) {
+                    menu.addView(sendMessagesView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+                }
                 sendMessagesView.setOnClickListener(v -> {
                     if (chatActivity.isInScheduleMode()) {
                         AlertsCreator.createScheduleDatePickerDialog(
