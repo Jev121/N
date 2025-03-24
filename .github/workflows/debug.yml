@@ -8,6 +8,7 @@ on:
       - '**.md'
       - '.github/**'
       - '!.github/workflows/debug.yml'
+
   workflow_dispatch:
     inputs:
       upload:
@@ -446,16 +447,18 @@ jobs:
           file_paths = ("""${mini64}""", """${mini32}""", """${full64}""", """${full32}""")
           print(file_paths)
           list_captions = ("", "", "", """Test version, [${{ github.event.head_commit.message }}](${{ github.event.head_commit.url }})""")
-          for file, caption, message_id in zip(file_paths, list_captions, range(46, 50)):
-            media = telebot.types.InputMediaDocument(open(file, "rb"), caption=caption, parse_mode='Markdown')
-            for _ in range(3):
-              try:
-                tb.edit_message_media(chat_id='''${{ secrets.METADATA_CHANNEL_ID }}''', media=media, message_id=message_id)
-              except Exception as e:
-                print(e)
-              else:
-                break
-          tb.copy_messages(chat_id='''${{ secrets.HELPER_BOT_TARGET }}''', message_ids=list(range(46, 50)), from_chat_id='''${{ secrets.METADATA_CHANNEL_ID }}''')
+
+
+
+          media_group = [telebot.types.InputMediaDocument(open(file, "rb"), caption=caption, parse_mode='Markdown') for file, caption in zip(file_paths, list_captions)]
+
+
+          tb.send_media_group(chat_id='''${{ secrets.HELPER_BOT_TARGET }}''', media=media_group, timeout=300)
+
+
+
+
+
           EOL
 
           python Send_to_Telegram.py
