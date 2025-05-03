@@ -908,6 +908,10 @@ public class MessageObject {
         public Drawable copySelector;
         public Paint copySeparator;
 
+        public int heightCollapsed() {
+            return quoteCollapse ? collapsedHeight : height;
+        }
+
         public int height() {
             return quoteCollapse && collapsed() ? collapsedHeight : height;
         }
@@ -4915,8 +4919,35 @@ public class MessageObject {
                     }
                 } else if (messageOwner.action instanceof TLRPC.TL_messageActionGameScore) {
                     generateGameMessageText(fromUser);
+                } else if (messageOwner.action instanceof TLRPC.TL_messageActionConferenceCall) {
+                    final TLRPC.TL_messageActionConferenceCall call = (TLRPC.TL_messageActionConferenceCall) messageOwner.action;
+                    if (isOutOwner()) {
+                        messageText = getString(R.string.ConferenceCallOutgoing);
+                    } else if (call.missed) {
+                        messageText = getString(R.string.ConferenceCallMissed);
+                    } else {
+                        messageText = getString(R.string.ConferenceCallIncoming);
+                    }
+                    if (call.duration > 0) {
+                        String duration = LocaleController.formatCallDuration(call.duration);
+                        messageText = formatString(R.string.CallMessageWithDuration, messageText, duration);
+                        String _messageText = messageText.toString();
+                        int start = _messageText.indexOf(duration);
+                        if (start != -1) {
+                            SpannableString sp = new SpannableString(messageText);
+                            int end = start + duration.length();
+                            if (start > 0 && _messageText.charAt(start - 1) == '(') {
+                                start--;
+                            }
+                            if (end < _messageText.length() && _messageText.charAt(end) == ')') {
+                                end++;
+                            }
+                            sp.setSpan(new TypefaceSpan(Typeface.DEFAULT), start, end, 0);
+                            messageText = sp;
+                        }
+                    }
                 } else if (messageOwner.action instanceof TLRPC.TL_messageActionPhoneCall) {
-                    TLRPC.TL_messageActionPhoneCall call = (TLRPC.TL_messageActionPhoneCall) messageOwner.action;
+                    final TLRPC.TL_messageActionPhoneCall call = (TLRPC.TL_messageActionPhoneCall) messageOwner.action;
                     boolean isMissed = call.reason instanceof TLRPC.TL_phoneCallDiscardReasonMissed;
                     if (isFromUser() && messageOwner.from_id.user_id == UserConfig.getInstance(currentAccount).getClientUserId()) {
                         if (isMissed) {
@@ -5083,14 +5114,20 @@ public class MessageObject {
                     } else {
                         messageText = replaceWithLink(getString(R.string.UserAcceptedToGroupAction), "un1", fromObject);
                     }
-                } else if (messageOwner.action instanceof TLRPC.TL_messageActionPaidMessage) {
-                    final TLRPC.TL_messageActionPaidMessage action = (TLRPC.TL_messageActionPaidMessage) messageOwner.action;
+                } else if (messageOwner.action instanceof TLRPC.TL_messageActionPaidMessagesPrice) {
+                    final TLRPC.TL_messageActionPaidMessagesPrice action = (TLRPC.TL_messageActionPaidMessagesPrice) messageOwner.action;
                     if (isOutOwner()) {
-                        messageText = formatPluralStringComma("PaidMessageActionOut", (int) action.stars);
-                    } else if (getDialogId() > 0) {
-                        messageText = replaceWithLink(formatPluralStringComma("PaidMessageActionIn", (int) action.stars), "un1", fromObject);
+                        messageText = formatPluralStringComma("PaidMessagesPriceUpdatedOut", (int) action.stars);
                     } else {
-                        messageText = replaceWithLink(formatPluralStringComma("PaidMessageAction", (int) action.stars), "un1", fromObject);
+                        messageText = replaceWithLink(formatPluralStringComma("PaidMessagesPriceUpdated", (int) action.stars), "un1", fromObject);
+                    }
+                } else if (messageOwner.action instanceof TLRPC.TL_messageActionPaidMessagesRefunded) {
+                    final TLRPC.TL_messageActionPaidMessagesRefunded action = (TLRPC.TL_messageActionPaidMessagesRefunded) messageOwner.action;
+                    if (isOutOwner()) {
+                        final TLRPC.User user = getUser(users, sUsers, DialogObject.getPeerDialogId(messageOwner.peer_id));
+                        messageText = replaceWithLink(formatPluralStringComma("PaidMessagesRefundedOut", (int) action.stars), "un1", user);
+                    } else {
+                        messageText = replaceWithLink(formatPluralStringComma("PaidMessagesRefunded", (int) action.stars), "un1", fromObject);
                     }
                 }
             }
@@ -5567,7 +5604,7 @@ public class MessageObject {
             } else if (messageOwner.action instanceof TLRPC.TL_messageActionHistoryClear) {
                 contentType = -1;
                 type = -1;
-            } else if (messageOwner.action instanceof TLRPC.TL_messageActionPhoneCall) {
+            } else if (messageOwner.action instanceof TLRPC.TL_messageActionPhoneCall || messageOwner.action instanceof TLRPC.TL_messageActionConferenceCall) {
                 type = TYPE_PHONE_CALL;
             } else {
                 contentType = 1;
@@ -7719,6 +7756,16 @@ public class MessageObject {
         factCheckText = null;
     }
 
+    private Integer cachedTextHeight;
+    public int textHeightCached() {
+        if (cachedTextHeight != null) return cachedTextHeight;
+        if (textLayoutBlocks == null) return cachedTextHeight = 0;
+        int h = 0;
+        for (int i = 0; i < textLayoutBlocks.size(); ++i) {
+            h += textLayoutBlocks.get(i).padTop + textLayoutBlocks.get(i).heightCollapsed() + textLayoutBlocks.get(i).padBottom;
+        }
+        return cachedTextHeight = h;
+    }
     public int textHeight() {
         if (textLayoutBlocks == null) return 0;
         int h = 0;
@@ -8365,6 +8412,13 @@ public class MessageObject {
         return 0;
     }
 
+    public TLRPC.Peer getFromPeer() {
+        if (messageOwner != null) {
+            return messageOwner.from_id;
+        }
+        return null;
+    }
+
     public TLObject getFromPeerObject() {
         if (messageOwner != null) {
             if (messageOwner.from_id instanceof TLRPC.TL_peerChannel_layer131 ||
@@ -8609,6 +8663,10 @@ public class MessageObject {
             return (getMedia(messageOwner) != null && getMedia(messageOwner).ttl_seconds != 0) && (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaPhoto || getMedia(messageOwner) instanceof TLRPC.TL_messageMediaDocument);
         }
         return false;
+    }
+
+    public boolean isSecret() {
+        return messageOwner instanceof TLRPC.TL_message_secret;
     }
 
     public boolean isSecretMedia() {
@@ -9398,9 +9456,14 @@ public class MessageObject {
         return getApproximateHeight(false);
     }
 
+    private Integer cachedApproximateHeight;
+    public int getApproximateHeightCached() {
+        if (cachedApproximateHeight != null) return cachedApproximateHeight;
+        return cachedApproximateHeight = getApproximateHeight(true);
+    }
     public int getApproximateHeight(boolean fast) {
         if (type == TYPE_TEXT) {
-            int height = textHeight() + (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaWebPage && getMedia(messageOwner).webpage instanceof TLRPC.TL_webPage ? dp(100) : 0);
+            int height = (fast ? textHeightCached() : textHeight()) + (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaWebPage && getMedia(messageOwner).webpage instanceof TLRPC.TL_webPage ? dp(100) : 0);
             if (isReply()) {
                 height += dp(42);
             }
@@ -9424,7 +9487,7 @@ public class MessageObject {
         } else if (type == TYPE_ROUND_VIDEO) {
             return AndroidUtilities.roundMessageSize;
         } else if (type == TYPE_EMOJIS) {
-            return textHeight() + dp(30);
+            return (fast ? textHeightCached() : textHeight()) + dp(30);
         } else if (type == TYPE_STICKER || type == TYPE_ANIMATED_STICKER) {
             float maxHeight = AndroidUtilities.displaySize.y * 0.4f;
             float maxWidth;
@@ -9525,8 +9588,15 @@ public class MessageObject {
         return null;
     }
 
+    public boolean isConferenceCall() {
+        return messageOwner.action instanceof TLRPC.TL_messageActionConferenceCall;
+    }
+
     public boolean isVideoCall() {
-        return messageOwner.action instanceof TLRPC.TL_messageActionPhoneCall && messageOwner.action.video;
+        return (
+            messageOwner.action instanceof TLRPC.TL_messageActionPhoneCall && messageOwner.action.video ||
+            messageOwner.action instanceof TLRPC.TL_messageActionConferenceCall && messageOwner.action.video
+        );
     }
 
     public boolean isAnimatedEmoji() {
@@ -11459,12 +11529,16 @@ public class MessageObject {
     public VideoPlayer.VideoUri highestQuality, thumbQuality, cachedQuality;
 
     public boolean hasVideoQualities() {
+        return hasVideoQualities(true);
+    }
+
+    public boolean hasVideoQualities(boolean useFileDatabaseQueue) {
         if (videoQualitiesCached == null) {
             try {
                 if (messageOwner == null || messageOwner.media == null || messageOwner.media.document == null || messageOwner.media.alt_documents.isEmpty()) {
                     return videoQualitiesCached = false;
                 }
-                videoQualities = VideoPlayer.getQualities(currentAccount, messageOwner != null ? messageOwner.media : null);
+                videoQualities = VideoPlayer.getQualities(currentAccount, messageOwner != null ? messageOwner.media : null, useFileDatabaseQueue);
                 videoQualitiesCached = videoQualities != null && videoQualities.size() > 1;
                 highestQuality = VideoPlayer.getQualityForPlayer(videoQualities);
                 thumbQuality = VideoPlayer.getQualityForThumb(videoQualities);
@@ -11491,6 +11565,7 @@ public class MessageObject {
     public void updateQualitiesCached(boolean useFileDatabaseQueue) {
         if (videoQualities == null) {
             cachedQuality = null;
+            hasVideoQualities(useFileDatabaseQueue);
             return;
         }
         for (VideoPlayer.Quality q : videoQualities) {
