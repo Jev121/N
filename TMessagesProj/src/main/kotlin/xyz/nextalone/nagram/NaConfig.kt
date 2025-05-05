@@ -803,6 +803,13 @@ object NaConfig {
             12,
             false
         )
+    val disablePhoneSharePrompt =
+        addConfig(
+            "DisablePhoneSharePrompt",
+            disableTrendingFlags,
+            13,
+            false
+        )
     val disableRepeatInChannel =
         addConfig(
             "DisableRepeatInChannel",
@@ -848,6 +855,12 @@ object NaConfig {
             "Forward",
             disableActionBarButton,
             4,
+            false
+        )
+    val coloredAdminTitle =
+        addConfig(
+            "ColoredAdminTitle",
+            ConfigItem.configTypeBool,
             false
         )
 

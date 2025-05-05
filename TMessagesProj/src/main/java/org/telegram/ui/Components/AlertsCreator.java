@@ -91,6 +91,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.messenger.browser.Browser;
+import org.telegram.messenger.pip.PipNativeApiController;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
@@ -129,7 +130,9 @@ import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 import org.telegram.ui.ThemePreviewActivity;
 import org.telegram.ui.TooManyCommunitiesActivity;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1570,7 +1573,11 @@ public class AlertsCreator {
         textView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
         textView.setEllipsizeByGradient(true);
         textView.setText(user.first_name);
-        if (user.verified) {
+        if (user.scam) {
+            textView.setRightDrawable(Theme.dialogs_scamDrawable);
+        } else if (user.fake) {
+            textView.setRightDrawable(Theme.dialogs_fakeDrawable);
+        } else if (user.verified) {
             Drawable verifiedBackground = context.getResources().getDrawable(R.drawable.verified_area).mutate();
             verifiedBackground.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_verifiedBackground), PorterDuff.Mode.MULTIPLY));
             Drawable verifiedCheck = context.getResources().getDrawable(R.drawable.verified_check).mutate();
@@ -1687,7 +1694,11 @@ public class AlertsCreator {
         titleView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL);
         titleView.setEllipsizeByGradient(true);
         titleView.setText(user.first_name);
-        if (user.verified) {
+        if (user.scam) {
+            titleView.setRightDrawable(Theme.dialogs_scamDrawable);
+        } else if (user.fake) {
+            titleView.setRightDrawable(Theme.dialogs_fakeDrawable);
+        } else if (user.verified) {
             Drawable verifiedBackground = context.getResources().getDrawable(R.drawable.verified_area).mutate();
             verifiedBackground.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_verifiedBackground), PorterDuff.Mode.MULTIPLY));
             Drawable verifiedCheck = context.getResources().getDrawable(R.drawable.verified_check).mutate();
@@ -1838,6 +1849,7 @@ public class AlertsCreator {
             final Runnable gotBalance = () -> {
                 final long balance = StarsController.getInstance(currentAccount).getBalance().amount;
                 if (balance < totalPrice) {
+                    if (activity == null) return;
                     new StarsIntroActivity.StarsNeededSheet(activity, resourcesProvider, totalPrice, StarsIntroActivity.StarsNeededSheet.TYPE_PRIVATE_MESSAGE, DialogObject.getShortName(currentAccount, dialogIds.get(0)), () -> {
                         confirmed.run(prices);
                     }).show();
@@ -1894,6 +1906,7 @@ public class AlertsCreator {
                     final BaseFragment lastFragment = LaunchActivity.getSafeLastFragment();
                     final Theme.ResourcesProvider resourcesProvider = PhotoViewer.getInstance().isVisible() || lastFragment != null && lastFragment.hasShownSheet() ? new DarkThemeResourceProvider() : (lastFragment != null ? lastFragment.getResourceProvider() : null);
 
+                    if (activity == null) return;
                     new StarsIntroActivity.StarsNeededSheet(activity, resourcesProvider, price, StarsIntroActivity.StarsNeededSheet.TYPE_PRIVATE_MESSAGE, DialogObject.getShortName(currentAccount, dialogId), () -> {
                         confirmedPrice.run(send_paid_messages_stars);
                     }).show();
@@ -1996,9 +2009,14 @@ public class AlertsCreator {
         if (!TextUtils.isEmpty(check)) {
             cell[0] = new CheckBoxCell(context, 1, resourcesProvider);
             cell[0].setBackground(Theme.getSelectorDrawable(false));
+            cell[0].setMultiline(true);
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) cell[0].getCheckBoxView().getLayoutParams();
+            lp.topMargin = 0;
+            lp.gravity = (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL;
+            cell[0].getCheckBoxView().setLayoutParams(lp);
             cell[0].setText(check, "", false, false);
-            cell[0].setPadding(LocaleController.isRTL ? dp(16) : dp(8), 0, LocaleController.isRTL ? dp(8) : dp(16), 0);
-            frameLayout.addView(cell[0], LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.BOTTOM | Gravity.LEFT, 0, 0, 0, 0));
+            cell[0].setPadding(LocaleController.isRTL ? dp(16) : dp(8), dp(8), LocaleController.isRTL ? dp(8) : dp(16), dp(8));
+            frameLayout.addView(cell[0], LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM | Gravity.LEFT));
             cell[0].setOnClickListener(v -> {
                 CheckBoxCell cell1 = (CheckBoxCell) v;
                 value[0] = !value[0];
@@ -3004,7 +3022,7 @@ public class AlertsCreator {
             BaseFragment lastFragment = LaunchActivity.getLastFragment();
             if (lastFragment != null && lastFragment.getParentActivity() != null) {
                 LimitReachedBottomSheet restrictedUsersBottomSheet = new LimitReachedBottomSheet(lastFragment, lastFragment.getParentActivity(), LimitReachedBottomSheet.TYPE_ADD_MEMBERS_RESTRICTED, currentAccount, null);
-                restrictedUsersBottomSheet.setRestrictedUsers(currentChat, users, pmLockedUsers, inviteLockedUsers);
+                restrictedUsersBottomSheet.setRestrictedUsers(currentChat, users, pmLockedUsers, inviteLockedUsers, null);
                 restrictedUsersBottomSheet.show();
             }
         }, 200);
@@ -3763,9 +3781,7 @@ public class AlertsCreator {
                 long date = currentTime + (long) value * 86400000L;
                 calendar.setTimeInMillis(date);
                 int year = calendar.get(Calendar.YEAR);
-                LocaleController loc = LocaleController.getInstance();
-                final String week = loc.getFormatterWeek().format(date) + ", ";
-                
+                final String week = LocaleController.getInstance().getFormatterWeek().format(date) + ", ";
                 if (year == currentYear) {
                     return (
                         LocaleController.getInstance().getFormatterWeek().format(date) +
@@ -3773,7 +3789,7 @@ public class AlertsCreator {
                         LocaleController.getInstance().getFormatterScheduleDay().format(date)
                     );
                 } else {
-                    return week + loc.getFormatterScheduleYear().format(date);
+                    return week + LocaleController.getInstance().getFormatterScheduleYear().format(date);
                 }
             }
         });
@@ -5858,6 +5874,10 @@ public class AlertsCreator {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static AlertDialog.Builder createDrawOverlayPermissionDialog(Activity activity, AlertDialog.OnButtonClickListener onCancel) {
+        return createDrawOverlayPermissionDialog(activity, onCancel, false);
+    }
+
+    public static AlertDialog.Builder createDrawOverlayPermissionDialog(Activity activity, AlertDialog.OnButtonClickListener onCancel, boolean allowPictureInPicture) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         String svg = AndroidUtilities.readRes(R.raw.pip_video_request);
 
@@ -5882,6 +5902,15 @@ public class AlertsCreator {
         builder.setPositiveButton(LocaleController.getString(R.string.Enable), (dialogInterface, i) -> {
             if (activity != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (allowPictureInPicture && PipNativeApiController.checkPermissions(activity) == PipNativeApiController.PIP_DENIED_PIP) {
+                        try {
+                            activity.startActivity(new Intent("android.settings.PICTURE_IN_PICTURE_SETTINGS", Uri.parse("package:" + activity.getPackageName())));
+                            return;
+                        } catch (Exception e) {
+                            FileLog.e(e);
+                        }
+                    }
+
                     try {
                         activity.startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + activity.getPackageName())));
                     } catch (Exception e) {
